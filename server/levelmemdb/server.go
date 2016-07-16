@@ -108,7 +108,11 @@ func readString(conn net.Conn) string{
   slen = int(lenbuf[0])<<24 + int(lenbuf[1])<<16 + int(lenbuf[2])<<8 + int(lenbuf[3])
   //fmt.Println("Slen:",slen)
   strbuf := make([]byte,slen)
-  conn.Read(strbuf) //? err
+  dsum:=0;
+  for dsum!=slen{
+    n,_ := conn.Read(strbuf[dsum:]) //? err
+    dsum+=n
+  }
   return string(strbuf)
 }
 
