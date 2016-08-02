@@ -5,6 +5,7 @@ import (
   "fmt"
   "net"
   "strconv"
+  // "strings"
   kvstore "levelmemdb/lmemdb_kvstore"
 )
 
@@ -42,32 +43,55 @@ func batoi(bytearr []byte) int{
   return x
 }
 
-func (cl *Client) performTask(strarr []string) []string{
+func (cl *Client) performTask(strarr []string) ([]string,int){
+  used:=1
   switch strarr[0] {
   case "CreateTable":
     cl.kvs.CreateTable(strarr[1],&tm)
-    return []string{"true"}
+    used++;
+    return []string{"true"},used
   case "Get":
     val,serr,ierr := cl.kvs.Get(strarr[1])
-    return []string{val,serr,strconv.Itoa(ierr)}
+    used++;
+    return []string{val,serr,strconv.Itoa(ierr)},used
   case "Put":
     serr,ierr := cl.kvs.Put(strarr[1],strarr[2])
-    return []string{"",serr,strconv.Itoa(ierr)}
+    used+=2;
+    return []string{"",serr,strconv.Itoa(ierr)},used
   case "Del":
     serr,ierr := cl.kvs.Del(strarr[1])
-    return []string{"",serr,strconv.Itoa(ierr)}
+    used++;
+    return []string{"",serr,strconv.Itoa(ierr)},used
   case "Clear":
     cl.kvs.Clear()
-    return []string{"true"}
+    return []string{"true"},used
   }
-  return []string{""}
+  return []string{""},used
 }
 
+func (cl *Client) performMultipleTasks(strarr []string) []string{
+  l := len(strarr)
+  ret := make([]string,0)
+  idx := 0
+  for idx!=l {
+    s,n := cl.performTask(strarr[idx:])
+    idx+=n
+    ret = append(ret,s...)
+  }
+  //fmt.Println("Return ",ret);
+  return ret
+}
 
 func (cl *Client) doTask(strarr []string,conn net.Conn){
   //fmt.Println("Strings\n",strarr)
-  ret := cl.performTask(strarr)
-  writeStrings(ret,conn)
+  //fmt.Println("Request arrived",strarr)
+  if strarr[0]=="Multiple" {
+    ret := cl.performMultipleTasks(strarr[1:])
+    writeStrings(ret,conn)
+  }else{
+    ret,_ := cl.performTask(strarr)
+    writeStrings(ret,conn)
+  }
   //time.Sleep(5000)
   //os.Exit(0)
 }
@@ -98,7 +122,10 @@ func writeStrings(strarr []string,conn net.Conn){
     idx+=slen
 
   }
-  conn.Write(bytearr) //? err
+  n,err := conn.Write(bytearr) //? err
+  if n<sum {
+    fmt.Println("Write error",err);
+  }
 }
 
 func readString(conn net.Conn) string{
@@ -152,7 +179,7 @@ func main() {
     return
     } else {
       tm = *kvstore.NewTableManager()
-      fmt.Println("Server started at",os.Args[1])
+      fmt.Println("Server started at ",os.Args[1])
       for{
         conn, err := ln.Accept()
         if err != nil {

@@ -8,8 +8,8 @@ using namespace std;
 void doSomthing(){
   KVStore<int,string> k;
   //SocketAddress,TableName
-  k.bind("10.129.26.154:8090","ShreeGanesh"); //Exactly once for each KVStore object
-  //k.bind("127.1.1.1:8090","ShreeGanesh"); //Exactly once for each KVStore object
+  //k.bind("10.129.26.154:8090","ShreeGanesh"); //Exactly once for each KVStore object
+  k.bind("127.1.1.1:8090","ShreeGanesh"); //Exactly once for each KVStore object
 
   cout<<"First get()"<<endl;
   auto kvd = k.get(11); //You can also use KVData<string> insted of auto
@@ -35,8 +35,10 @@ void doSomthing(){
     cout<<"Got Data : "<<kvd.value<<endl;
   }
 
-  cout<<endl<<"get() after clear"<<endl;
-  k.clear();
+  // cout<<endl<<"get() after clear"<<endl;
+  //k.clear();
+  cout<<endl<<"get() after del"<<endl;
+  k.del(10);
   kvd = k.get(10);
   if(kvd.ierr<0){
     cout<<"Error in getting data"<<endl<<kvd.serr<<endl;

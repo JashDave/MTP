@@ -10,6 +10,10 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <vector>
+
+//For returning hetrogeneous array as return of execute()
+#include <tuple> //Not used
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -37,6 +41,40 @@ namespace kvstore {
 	template<typename ValType>
 	class KVData;
 
+class KVResultSet {
+private:
+	int count;
+	vector<string> res;
+public:
+	KVResultSet(vector<string> r);
+	int size();
+	template<typename ValType>
+	KVData<ValType> get(int idx);
+};
+
+  class KVRequest {
+	private:
+		int count=0;
+		void *kvsclient;
+		std::vector<string> v;
+	public:
+		KVRequest(string connection);
+		~KVRequest();		//For distroying connection object
+
+		template<typename KeyType, typename ValType>
+		void get(KeyType const& key,string tablename);
+
+		template<typename KeyType, typename ValType>
+		void put(KeyType const& key,ValType const& val,string tablename);
+
+		template<typename KeyType, typename ValType>
+		void del(KeyType const& key,string tablename);
+
+		KVResultSet execute();
+		void reset();
+	};
+
+
 	template<typename KeyType, typename ValType>
 	class KVStore {
 	private:
@@ -59,6 +97,8 @@ namespace kvstore {
 		string serr;
 		int ierr;
 		ValType value;
+
+		//void set(string se,int ie,string val);
 	};
 
 	template<typename T>

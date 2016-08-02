@@ -13,6 +13,98 @@
 
 namespace kvstore {
 
+
+
+  	KVResultSet::KVResultSet(vector<string> r){
+      count=r.size()/4;
+      res=r;
+    }
+
+  	int KVResultSet::size(){
+      return count;
+    }
+
+  	template<typename ValType>
+  	KVData<ValType> KVResultSet::get(int idx){
+      KVData<ValType> ret;
+      if(idx>=0 && idx<count){
+        ret.serr = res[idx*4+2];
+        ret.ierr = stoi(res[idx*4+3]);
+        if(ret.ierr==0){
+          ret.value = toBoostObject<ValType>(res[idx*4+1]);
+        }
+      } else {
+        ret.ierr=-1;
+        ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
+      }
+      return ret;
+    }
+
+
+/*
+  template<typename ValType>
+  void KVData<ValType>::setValue(string s){
+  	value = toBoostObject<ValType>(s);
+  }
+*/
+
+  KVRequest::KVRequest(string connection){
+    int colon = connection.find(":");
+    string ip = connection.substr(0,colon);
+    string port = connection.substr(colon+1);
+    kvsclient = (void *) new KVStoreClient(ip,stoi(port));
+    v.push_back("Multiple");
+  }
+  KVRequest::~KVRequest(){
+    //For distroying connection object
+  }
+
+  template<typename KeyType, typename ValType>
+  void KVRequest::get(KeyType const& key,string tablename){
+    v.push_back("CreateTable");
+    v.push_back(tablename);
+    string skey=toBoostString(key);
+    v.push_back("Get");
+    v.push_back(skey);
+    //rep.push_back(new KVData<ValType>);
+  }
+
+  template<typename KeyType, typename ValType>
+  void KVRequest::put(KeyType const& key,ValType const& val,string tablename){
+    v.push_back("CreateTable");
+    v.push_back(tablename);
+    string skey=toBoostString(key);
+    string sval=toBoostString(val);
+    v.push_back("Put");
+    v.push_back(skey);
+    v.push_back(sval);
+    //rep.push_back(new KVData<ValType>);
+  }
+
+  template<typename KeyType, typename ValType>
+  void KVRequest::del(KeyType const& key,string tablename){
+    v.push_back("CreateTable");
+    v.push_back(tablename);
+    string skey=toBoostString(key);
+    v.push_back("Del");
+    v.push_back(skey);
+    //rep.push_back(new KVData<ValType>);
+  }
+
+  KVResultSet KVRequest::execute(){
+     c_kvsclient->send(v);
+     vector<string> rcv=c_kvsclient->receive();
+     //cout<<"Received size"<<rcv.size()<<"  "<<rcv[0]<<endl;
+    return KVResultSet(rcv);
+  }
+
+  void KVRequest::reset(){
+    v.clear();
+    v.push_back("Multiple");
+  }
+
+
+
   template<typename KeyType, typename ValType>
   KVStore<KeyType,ValType>::KVStore(){
   }
@@ -63,47 +155,47 @@ namespace kvstore {
   template<typename KeyType, typename ValType>
   KVData<ValType> KVStore<KeyType,ValType>::put(KeyType const& key,ValType const& val){
     //cout<<"PUT"<<endl;
-        string skey=toBoostString(key);
-        string sval=toBoostString(val);
-        std::vector<string> v;
-        v.push_back("Put");
-        v.push_back(skey);
-        v.push_back(sval);
-        c_kvsclient->send(v);
+    string skey=toBoostString(key);
+    string sval=toBoostString(val);
+    std::vector<string> v;
+    v.push_back("Put");
+    v.push_back(skey);
+    v.push_back(sval);
+    c_kvsclient->send(v);
 
-        KVData<ValType> kvd;
-        v=c_kvsclient->receive();
-        kvd.serr = v[1];
-        kvd.ierr = stoi(v[2]);
-        return kvd;
+    KVData<ValType> kvd;
+    v=c_kvsclient->receive();
+    kvd.serr = v[1];
+    kvd.ierr = stoi(v[2]);
+    return kvd;
   }
 
   template<typename KeyType, typename ValType>
   KVData<ValType> KVStore<KeyType,ValType>::del(KeyType const& key){
-      string skey=toBoostString(key);
-      std::vector<string> v;
-      v.push_back("Del");
-      v.push_back(skey);
-      c_kvsclient->send(v);
+    string skey=toBoostString(key);
+    std::vector<string> v;
+    v.push_back("Del");
+    v.push_back(skey);
+    c_kvsclient->send(v);
 
-      KVData<ValType> kvd;
-      v=c_kvsclient->receive();
-      kvd.serr = v[1];
-      kvd.ierr = stoi(v[2]);
-      return kvd;
+    KVData<ValType> kvd;
+    v=c_kvsclient->receive();
+    kvd.serr = v[1];
+    kvd.ierr = stoi(v[2]);
+    return kvd;
   }
 
   template<typename KeyType, typename ValType>
   bool KVStore<KeyType,ValType>::clear() {
-      std::vector<string> v;
-      v.push_back("Clear");
-      c_kvsclient->send(v);
-      v=c_kvsclient->receive();
-      if(v[0].compare("true")==0)
-      {
-        return true;
-      }
-      return false;
+    std::vector<string> v;
+    v.push_back("Clear");
+    c_kvsclient->send(v);
+    v=c_kvsclient->receive();
+    if(v[0].compare("true")==0)
+    {
+      return true;
+    }
+    return false;
   }
 
 }
