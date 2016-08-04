@@ -1,109 +1,66 @@
 // Why both implementation and declaration are in same file
 // Refer : https://isocpp.org/wiki/faq/templates
 //        http://stackoverflow.com/questions/3040480/c-template-function-compiles-in-header-but-not-implementation
+//It only includes templates implementation
 #include "KVStoreHeader.h"
 
 #ifndef __KVSTORE_DEF__
 #define __KVSTORE_DEF__
 
 #include "kvstore_client.cpp"
-#include <vector>
 
 #define c_kvsclient ((KVStoreClient *)kvsclient)
 
 namespace kvstore {
 
-
-
-  	KVResultSet::KVResultSet(vector<string> r){
-      count=r.size()/4;
-      res=r;
-    }
-
-  	int KVResultSet::size(){
-      return count;
-    }
-
-  	template<typename ValType>
-  	KVData<ValType> KVResultSet::get(int idx){
-      KVData<ValType> ret;
-      if(idx>=0 && idx<count){
-        ret.serr = res[idx*4+2];
-        ret.ierr = stoi(res[idx*4+3]);
-        if(ret.ierr==0){
-          ret.value = toBoostObject<ValType>(res[idx*4+1]);
+    	template<typename ValType>
+    	KVData<ValType> KVResultSet::get(int idx){
+        KVData<ValType> ret;
+        if(idx>=0 && idx<count){
+          ret.serr = res[idx*4+2];
+          ret.ierr = stoi(res[idx*4+3]);
+          if(ret.ierr==0){
+            ret.value = toBoostObject<ValType>(res[idx*4+1]);
+          }
+        } else {
+          ret.ierr=-1;
+          ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
         }
-      } else {
-        ret.ierr=-1;
-        ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
+        return ret;
       }
-      return ret;
+
+
+    template<typename KeyType, typename ValType>
+    void KVRequest::get(KeyType const& key,string tablename){
+      v.push_back("CreateTable");
+      v.push_back(tablename);
+      string skey=toBoostString(key);
+      v.push_back("Get");
+      v.push_back(skey);
+      //rep.push_back(new KVData<ValType>);
     }
 
+    template<typename KeyType, typename ValType>
+    void KVRequest::put(KeyType const& key,ValType const& val,string tablename){
+      v.push_back("CreateTable");
+      v.push_back(tablename);
+      string skey=toBoostString(key);
+      string sval=toBoostString(val);
+      v.push_back("Put");
+      v.push_back(skey);
+      v.push_back(sval);
+      //rep.push_back(new KVData<ValType>);
+    }
 
-/*
-  template<typename ValType>
-  void KVData<ValType>::setValue(string s){
-  	value = toBoostObject<ValType>(s);
-  }
-*/
-
-  KVRequest::KVRequest(string connection){
-    int colon = connection.find(":");
-    string ip = connection.substr(0,colon);
-    string port = connection.substr(colon+1);
-    kvsclient = (void *) new KVStoreClient(ip,stoi(port));
-    v.push_back("Multiple");
-  }
-  KVRequest::~KVRequest(){
-    //For distroying connection object
-  }
-
-  template<typename KeyType, typename ValType>
-  void KVRequest::get(KeyType const& key,string tablename){
-    v.push_back("CreateTable");
-    v.push_back(tablename);
-    string skey=toBoostString(key);
-    v.push_back("Get");
-    v.push_back(skey);
-    //rep.push_back(new KVData<ValType>);
-  }
-
-  template<typename KeyType, typename ValType>
-  void KVRequest::put(KeyType const& key,ValType const& val,string tablename){
-    v.push_back("CreateTable");
-    v.push_back(tablename);
-    string skey=toBoostString(key);
-    string sval=toBoostString(val);
-    v.push_back("Put");
-    v.push_back(skey);
-    v.push_back(sval);
-    //rep.push_back(new KVData<ValType>);
-  }
-
-  template<typename KeyType, typename ValType>
-  void KVRequest::del(KeyType const& key,string tablename){
-    v.push_back("CreateTable");
-    v.push_back(tablename);
-    string skey=toBoostString(key);
-    v.push_back("Del");
-    v.push_back(skey);
-    //rep.push_back(new KVData<ValType>);
-  }
-
-  KVResultSet KVRequest::execute(){
-     c_kvsclient->send(v);
-     vector<string> rcv=c_kvsclient->receive();
-     //cout<<"Received size"<<rcv.size()<<"  "<<rcv[0]<<endl;
-    return KVResultSet(rcv);
-  }
-
-  void KVRequest::reset(){
-    v.clear();
-    v.push_back("Multiple");
-  }
-
-
+    template<typename KeyType, typename ValType>
+    void KVRequest::del(KeyType const& key,string tablename){
+      v.push_back("CreateTable");
+      v.push_back(tablename);
+      string skey=toBoostString(key);
+      v.push_back("Del");
+      v.push_back(skey);
+      //rep.push_back(new KVData<ValType>);
+    }
 
   template<typename KeyType, typename ValType>
   KVStore<KeyType,ValType>::KVStore(){

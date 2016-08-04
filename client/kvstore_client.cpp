@@ -25,9 +25,9 @@
 using namespace std;
 inline void itoba(uint32_t i,char *ba){
   ba[0]=(i>>24)&255;
-    ba[1]=(i>>16)&255;
-      ba[2]=(i>>8)&255;
-        ba[3]=(i)&255;
+  ba[1]=(i>>16)&255;
+  ba[2]=(i>>8)&255;
+  ba[3]=(i)&255;
 }
 
 inline uint32_t batoi(char *ba){
@@ -53,44 +53,44 @@ private:
 private:
 
 
-/*
+  /*
   void write_string(string str){
-  }
-  string read_string(){
-    //bzero(inputbuf,4);
-    n = read(sockfd,inputbuf,4);
-    if (n < 0)
-    {
-      fprintf(stderr, "ERROR reading from socket\n");
-      exit(1);
-    }
-    num_bytes=(inputbuf[0]<<24)+(inputbuf[1]<<16)+(inputbuf[2]<<8)+(inputbuf[3]);
-    if(num_bytes>=MAX_INPUT_SIZE){
-      more_buf=new char[num_bytes+1];
+}
+string read_string(){
+//bzero(inputbuf,4);
+n = read(sockfd,inputbuf,4);
+if (n < 0)
+{
+fprintf(stderr, "ERROR reading from socket\n");
+exit(1);
+}
+num_bytes=(inputbuf[0]<<24)+(inputbuf[1]<<16)+(inputbuf[2]<<8)+(inputbuf[3]);
+if(num_bytes>=MAX_INPUT_SIZE){
+more_buf=new char[num_bytes+1];
 
-      n = read(sockfd,more_buf,(int)num_bytes);
-      if (n < 0)
-      {
-        fprintf(stderr, "ERROR reading from socket\n");
-        exit(1);
-      }
-      more_buf[num_bytes]='\0';
-      string str(more_buf);
-      delete more_buf;
-      return str;
-    } else {
+n = read(sockfd,more_buf,(int)num_bytes);
+if (n < 0)
+{
+fprintf(stderr, "ERROR reading from socket\n");
+exit(1);
+}
+more_buf[num_bytes]='\0';
+string str(more_buf);
+delete more_buf;
+return str;
+} else {
 
-      n = read(sockfd,inputbuf,num_bytes);
-      if (n < 0)
-      {
-        fprintf(stderr, "ERROR reading from socket\n");
-        exit(1);
-      }
-      inputbuf[num_bytes]='\0';
-      return string(inputbuf);
-    }
-    return NULL;
-  }
+n = read(sockfd,inputbuf,num_bytes);
+if (n < 0)
+{
+fprintf(stderr, "ERROR reading from socket\n");
+exit(1);
+}
+inputbuf[num_bytes]='\0';
+return string(inputbuf);
+}
+return NULL;
+}
 */
 public:
   KVStoreClient(string ip_addr,int port){
@@ -120,35 +120,35 @@ public:
       fprintf(stderr, "ERROR connecting\n");
       exit(1);
     }
-    printf("Connected to server\n");
+    //printf("Connected to server\n");
   }
-/*
+  /*
   bool create_table_reply(){
-    n = read(sockfd,inputbuf,1);
-    if (n < 0)
-    {
-      fprintf(stderr, "ERROR reading from socket\n");
-      exit(1);
-    }
-    if(inputbuf[0]==CREATE_TABLE){
+  n = read(sockfd,inputbuf,1);
+  if (n < 0)
+  {
+  fprintf(stderr, "ERROR reading from socket\n");
+  exit(1);
+}
+if(inputbuf[0]==CREATE_TABLE){
 
-      n = read(sockfd,inputbuf,5);
-      if (n < 0)
-      {
-        fprintf(stderr, "ERROR reading from socket\n");
-        exit(1);
-      }
-      if(inputbuf[4]==0){
-        return false;
-      } else {
-        return true;
-      }
-    }else{
-      fprintf(stderr, "ERROR in create table reply\n");
-      exit(1);
-    }
-    return false;
-  }
+n = read(sockfd,inputbuf,5);
+if (n < 0)
+{
+fprintf(stderr, "ERROR reading from socket\n");
+exit(1);
+}
+if(inputbuf[4]==0){
+return false;
+} else {
+return true;
+}
+}else{
+fprintf(stderr, "ERROR in create table reply\n");
+exit(1);
+}
+return false;
+}
 */
 void send(vector<string> &v){
   int len=v.size();
@@ -184,106 +184,106 @@ vector<string> receive(){
   int len=(int)inputbuf[0];
   std::vector<string> v(len);
   for(int i=0;i<len;i++){
-  n = read(sockfd,inputbuf,4);
-  if (n < 0)
-  {
-    fprintf(stderr, "ERROR reading from socket\n");
-    exit(1);
+    n = read(sockfd,inputbuf,4);
+    if (n < 0)
+    {
+      fprintf(stderr, "ERROR reading from socket\n");
+      exit(1);
+    }
+    int sz=(int)batoi(inputbuf);
+    int sumn=0;
+    while(sumn!=sz){
+      n = read(sockfd,inputbuf+sumn,sz-sumn);
+      sumn+=n;
+      //printf("SZ:%d  N:%d\n",sz,n);
+      if (n < 0)
+      {
+        fprintf(stderr, "ERROR reading from socket\n");
+        exit(1);
+      }
+    }
+    v[i]=string(inputbuf,sz);
   }
-  int sz=(int)batoi(inputbuf);
-  int sumn=0;
-  while(sumn!=sz){
-  n = read(sockfd,inputbuf+sumn,sz-sumn);
-  sumn+=n;
-  //printf("SZ:%d  N:%d\n",sz,n);
-  if (n < 0)
-  {
-    fprintf(stderr, "ERROR reading from socket\n");
-    exit(1);
-  }
-}
-  v[i]=string(inputbuf,sz);
-}
-return v;
+  return v;
 }
 };
 
 /*
 int main(int argc, char *argv[])
 {
-  // char chx[4];
-  // for(int i=0;i<1024;i++){
-  //   itoba(i,chx);
-  //   cout<<batoi(chx)<< "  ";
-  // }
+// char chx[4];
+// for(int i=0;i<1024;i++){
+//   itoba(i,chx);
+//   cout<<batoi(chx)<< "  ";
+// }
 
-  // std::vector<string> v;
-  // v.push_back("CreateTable");
-  // v.push_back("shreeganesh");
-  // string byte10="1234567890";
-  // string mb1="";
-  // for(long long i=0;i<100*100;i++){
-  //   mb1+=byte10;
-  // }
-  // mb1+="abcd";
-  // cout<<"MB1:"<<mb1<<endl;
-  // v.push_back(mb1);
-  // v.push_back("Pratik");
-  //   KVStoreClient k("127.1.1.1",8090);
-  //   for(int i=0;i<1;i++){
-  //   k.send(v);
-  //   std::vector<string> r=k.receive();
-  //   int l=r.size();
-  //   for(int i=0;i<l;i++){
-  //     printf("%s\n",r[i].c_str());
-  //     cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
-  //   }
-  //
-  //   for(int i=88;i<100;i++){
-  //     cout<<int(r[2][i]);
-  //   }
-  //
-  //   cout<<endl;
-    //sleep(1);
+// std::vector<string> v;
+// v.push_back("CreateTable");
+// v.push_back("shreeganesh");
+// string byte10="1234567890";
+// string mb1="";
+// for(long long i=0;i<100*100;i++){
+//   mb1+=byte10;
+// }
+// mb1+="abcd";
+// cout<<"MB1:"<<mb1<<endl;
+// v.push_back(mb1);
+// v.push_back("Pratik");
+//   KVStoreClient k("127.1.1.1",8090);
+//   for(int i=0;i<1;i++){
+//   k.send(v);
+//   std::vector<string> r=k.receive();
+//   int l=r.size();
+//   for(int i=0;i<l;i++){
+//     printf("%s\n",r[i].c_str());
+//     cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
+//   }
+//
+//   for(int i=88;i<100;i++){
+//     cout<<int(r[2][i]);
+//   }
+//
+//   cout<<endl;
+//sleep(1);
 
-        std::vector<string> v1;
-        v1.push_back("CreateTable");
-        v1.push_back("shreeganesh");
-            //
-            // std::vector<string> v2;
-            // v2.push_back("Put");
-            // v2.push_back("shreeganesh");
-            // v2.push_back("Om Nama Shivay");
+std::vector<string> v1;
+v1.push_back("CreateTable");
+v1.push_back("shreeganesh");
+//
+// std::vector<string> v2;
+// v2.push_back("Put");
+// v2.push_back("shreeganesh");
+// v2.push_back("Om Nama Shivay");
 
-                std::vector<string> v3;
-                v3.push_back("Get");
-                v3.push_back("shreeganesh");
+std::vector<string> v3;
+v3.push_back("Get");
+v3.push_back("shreeganesh");
 
 
-      KVStoreClient k("127.1.1.1",8090);
-      k.send(v1);
-      std::vector<string> r=k.receive();
-      int l=r.size();
-      for(int i=0;i<l;i++){
-        cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
-      }
-      // sleep(1);
-      // k.send(v2);
-      // r=k.receive();
-      // l=r.size();
-      // for(int i=0;i<l;i++){
-      //   cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
-      // }
-      // sleep(1);
-      k.send(v3);
-      r=k.receive();
-      l=r.size();
-      for(int i=0;i<l;i++){
-        cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
-      }
+KVStoreClient k("127.1.1.1",8090);
+k.send(v1);
+std::vector<string> r=k.receive();
+int l=r.size();
+for(int i=0;i<l;i++){
+cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
+}
+// sleep(1);
+// k.send(v2);
+// r=k.receive();
+// l=r.size();
+// for(int i=0;i<l;i++){
+//   cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
+// }
+// sleep(1);
+k.send(v3);
+r=k.receive();
+l=r.size();
+for(int i=0;i<l;i++){
+cout<<r[i]<<" sz:"<<r[i].size()<<"\n";
+}
 
 //  }
-  return 0;
+return 0;
 }
 */
 #endif

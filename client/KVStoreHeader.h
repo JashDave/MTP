@@ -1,6 +1,7 @@
 // Why both implementation and declaration are in same file
 // Refer : https://isocpp.org/wiki/faq/templates
 //        http://stackoverflow.com/questions/3040480/c-template-function-compiles-in-header-but-not-implementation
+// Note that only implementation of templates are here since their true implementation is defered till their use.
 
 #ifndef __KVSTORE_H__
 #define __KVSTORE_H__
@@ -13,7 +14,7 @@
 #include <vector>
 
 //For returning hetrogeneous array as return of execute()
-#include <tuple> //Not used
+//#include <tuple> //Not used
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
