@@ -24,6 +24,9 @@ namespace kvstore {
           }
         } else {
           ret.ierr=-1;
+          if(count==0)
+          ret.serr="Empty KVResultSet due to empty request queue, please ensure that your request queue is not empty.";
+          else
           ret.serr="KVResultSet index out of bound. Valid range is 0 to "+to_string(count-1)+" found "+to_string(idx);
         }
         return ret;
