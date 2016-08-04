@@ -42,26 +42,25 @@ namespace kvstore {
 	template<typename ValType>
 	class KVData;
 
-class KVResultSet {
-private:
-	int count;
-	vector<string> res;
-public:
-	KVResultSet(vector<string> r);
-	int size();
-	template<typename ValType>
-	KVData<ValType> get(int idx);
-};
+	class KVResultSet {
+	private:
+		int count;
+		vector<string> res;
+	public:
+		KVResultSet(vector<string> r);
+		int size();
+		template<typename ValType>
+		KVData<ValType> get(int idx);
+	};
 
-  class KVRequest {
+	class KVRequest {
 	private:
 		int count=0;
 		void *kvsclient;
 		std::vector<string> v;
 	public:
-		KVRequest(string connection);
+		void bind(string connection);
 		~KVRequest();		//For distroying connection object
-
 		template<typename KeyType, typename ValType>
 		void get(KeyType const& key,string tablename);
 

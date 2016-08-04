@@ -108,74 +108,74 @@ int main(){
   int i;
   thread threads[thread_count];
 
-{
-  auto fp = doIndependentWrites;
-  string fname = "doIndependentWrites";
-  auto t1 = high_resolution_clock::now();
-  for (i = 0; i < thread_count; i++) {
-    threads[i] = thread(fp,i);
-  }
-  for (i = 0; i < thread_count; i++) {
-    if (threads[i].joinable()) {
-      threads[i].join();
+  {
+    auto fp = doIndependentWrites;
+    string fname = "doIndependentWrites";
+    auto t1 = high_resolution_clock::now();
+    for (i = 0; i < thread_count; i++) {
+      threads[i] = thread(fp,i);
     }
-  }
-  auto t2 = high_resolution_clock::now();
-  double dur = duration_cast<microseconds>(t2 -t1).count();
-  cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
-}
-
-{
-  auto fp = doWritesOnSameObjects;
-  string fname = "doWritesOnSameObjects";
-  auto t1 = high_resolution_clock::now();
-  for (i = 0; i < thread_count; i++) {
-    threads[i] = thread(fp,i);
-  }
-  for (i = 0; i < thread_count; i++) {
-    if (threads[i].joinable()) {
-      threads[i].join();
+    for (i = 0; i < thread_count; i++) {
+      if (threads[i].joinable()) {
+        threads[i].join();
+      }
     }
+    auto t2 = high_resolution_clock::now();
+    double dur = duration_cast<microseconds>(t2 -t1).count();
+    cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
   }
-  auto t2 = high_resolution_clock::now();
-  double dur = duration_cast<microseconds>(t2 -t1).count();
-  cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
-}
 
-
-{
-  auto fp = doIndependentReads;
-  string fname = "doIndependentReads";
-  auto t1 = high_resolution_clock::now();
-  for (i = 0; i < thread_count; i++) {
-    threads[i] = thread(fp,i);
-  }
-  for (i = 0; i < thread_count; i++) {
-    if (threads[i].joinable()) {
-      threads[i].join();
+  {
+    auto fp = doWritesOnSameObjects;
+    string fname = "doWritesOnSameObjects";
+    auto t1 = high_resolution_clock::now();
+    for (i = 0; i < thread_count; i++) {
+      threads[i] = thread(fp,i);
     }
-  }
-  auto t2 = high_resolution_clock::now();
-  double dur = duration_cast<microseconds>(t2 -t1).count();
-  cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
-}
-
-{
-  auto fp = doReadsOnSameObject;
-  string fname = "doReadsOnSameObject";
-  auto t1 = high_resolution_clock::now();
-  for (i = 0; i < thread_count; i++) {
-    threads[i] = thread(fp,i);
-  }
-  for (i = 0; i < thread_count; i++) {
-    if (threads[i].joinable()) {
-      threads[i].join();
+    for (i = 0; i < thread_count; i++) {
+      if (threads[i].joinable()) {
+        threads[i].join();
+      }
     }
+    auto t2 = high_resolution_clock::now();
+    double dur = duration_cast<microseconds>(t2 -t1).count();
+    cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
   }
-  auto t2 = high_resolution_clock::now();
-  double dur = duration_cast<microseconds>(t2 -t1).count();
-  cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
-}
+
+
+  {
+    auto fp = doIndependentReads;
+    string fname = "doIndependentReads";
+    auto t1 = high_resolution_clock::now();
+    for (i = 0; i < thread_count; i++) {
+      threads[i] = thread(fp,i);
+    }
+    for (i = 0; i < thread_count; i++) {
+      if (threads[i].joinable()) {
+        threads[i].join();
+      }
+    }
+    auto t2 = high_resolution_clock::now();
+    double dur = duration_cast<microseconds>(t2 -t1).count();
+    cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
+  }
+
+  {
+    auto fp = doReadsOnSameObject;
+    string fname = "doReadsOnSameObject";
+    auto t1 = high_resolution_clock::now();
+    for (i = 0; i < thread_count; i++) {
+      threads[i] = thread(fp,i);
+    }
+    for (i = 0; i < thread_count; i++) {
+      if (threads[i].joinable()) {
+        threads[i].join();
+      }
+    }
+    auto t2 = high_resolution_clock::now();
+    double dur = duration_cast<microseconds>(t2 -t1).count();
+    cout<<"Total time for "<<thread_count<<" "<<fname<<" threads is "<<dur<<" microsecond"<<endl<<endl;
+  }
 
   return 0;
 }
