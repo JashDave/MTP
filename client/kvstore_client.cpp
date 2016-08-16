@@ -49,6 +49,7 @@ private:
   int sockfd, n;
   struct sockaddr_in server_addr;
   char inputbuf[MAX_INPUT_SIZE],*more_buf;
+  char outbuf[MAX_INPUT_SIZE];
 
 private:
 
@@ -157,7 +158,11 @@ void send(vector<string> &v){
     sum+=(v[i].size()+4);
   }
   int idx=0;
-  char *data = new char[sum];
+  char *data=outbuf;
+  if(MAX_INPUT_SIZE<sum){
+	  cout<<"Alloc data sum="<<sum<<endl;
+   data = new char[sum];
+  }
   data[idx]=(char)len;
   idx++;
   for(int i=0;i<len;i++){
@@ -166,11 +171,32 @@ void send(vector<string> &v){
     strncpy(data+idx,v[i].c_str(),v[i].size());
     idx+=v[i].size();
   }
-  n = write(sockfd,data,sum);
-  if (n < 0)
-  {
-    fprintf(stderr, "ERROR writing to socket\n");
-    exit(1);
+  n=-1;
+  int sent=0;
+  while(sent<sum){
+  n = write(sockfd,data+sent,sum-sent);
+
+	if (errno == EPERM) {
+		errno = 0;
+		usleep(1000);
+		continue;
+	}
+	else if(n<0) {
+	    fprintf(stderr, "ERROR writing to socket %d\n",errno);
+	    exit(1);
+//		break;
+	}
+//  if (n < 0)
+//  {
+//    fprintf(stderr, "ERROR writing to socket\n",);
+//    exit(1);
+//  }
+  sent+=n;
+  }
+  if(MAX_INPUT_SIZE<sum){
+
+	  cout<<"Delete data sum="<<sum<<endl;
+   delete(data);
   }
 }
 

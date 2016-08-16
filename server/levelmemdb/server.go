@@ -5,6 +5,7 @@ import (
   "fmt"
   "net"
   "strconv"
+  "time"
   // "strings"
   kvstore "levelmemdb/lmemdb_kvstore"
 )
@@ -89,8 +90,12 @@ func (cl *Client) doTask(strarr []string,conn net.Conn){
     ret := cl.performMultipleTasks(strarr[1:])
     writeStrings(ret,conn)
   }else{
+    t1:=time.Now().Nanosecond()
     ret,_ := cl.performTask(strarr)
+    t2:=time.Now().Nanosecond()
+    fmt.Println(strarr[0],"in",t2-t1,"nanosecond")
     writeStrings(ret,conn)
+
   }
   //time.Sleep(5000)
   //os.Exit(0)

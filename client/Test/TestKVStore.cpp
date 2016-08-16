@@ -48,7 +48,7 @@ void doSomthing(){
 
   cout<<endl<<"Second put() for next run"<<endl;
   string str="Some data from old writes in this table.";
-  for(int i=0;i<3000;i++){
+  for(int i=0;i<200;i++){
     str+="1234567890";
   }
   str+="abcd";
